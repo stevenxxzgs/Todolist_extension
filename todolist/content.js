@@ -1,3 +1,7 @@
+// 内容脚本 - To-Do Events
+// 作者: github:stevenxxzgs
+// 版本: 2.0
+
 // 创建待办事项小部件
 function createTodoWidget() {
   // 加载Google字体和图标
@@ -50,82 +54,118 @@ function createTodoWidget() {
 
 // 加载待办事项 - 添加缓存机制
 let lastTodosHash = '';
+let pendingUpdates = false;
+let updateTimeout = null;
 
 function loadTodos() {
-  chrome.storage.local.get(['todos'], (result) => {
-    const todos = result.todos || [];
-    
-    // 使用简单的哈希比较，如果数据没变则不更新
-    const currentHash = JSON.stringify(todos);
-    if (currentHash === lastTodosHash) {
-      return; // 数据没变，无需更新
-    }
-    lastTodosHash = currentHash;
-    
-    const todoList = document.getElementById('todoList');
-    if (!todoList) return;
-    
-    // 最小化 DOM 操作：找出哪些需要添加、哪些需要移除
-    const existingItems = Array.from(todoList.querySelectorAll('li'));
-    const existingIds = existingItems.map(li => li.dataset.id);
-    
-    // 找出需要添加的新项目
-    const todoIds = todos.map(todo => String(todo.id));
-    
-    // 移除不再存在的项目
-    existingItems.forEach(item => {
-      if (!todoIds.includes(item.dataset.id)) {
-        // 添加动画然后移除
-        item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-        item.style.transform = 'translateX(-100%)';
-        item.style.opacity = '0';
-        setTimeout(() => {
-          if (item.parentNode === todoList) {
-            todoList.removeChild(item);
-          }
-        }, 300);
-      }
-    });
-    
-    // 添加新项目或更新现有项目
-    todos.forEach((todo, index) => {
-      const id = String(todo.id);
-      const existingItem = todoList.querySelector(`li[data-id="${id}"]`);
-      
-      if (!existingItem) {
-        // 新项目，添加到列表
-        renderTodo(todo);
-      } else {
-        // 更新现有项目状态
-        const checkbox = existingItem.querySelector('input[type="checkbox"]');
-        if (checkbox && checkbox.checked !== todo.completed) {
-          checkbox.checked = todo.completed;
-          const todoText = existingItem.querySelector('.todo-text');
-          if (todoText) {
-            if (todo.completed) {
-              todoText.classList.add('completed');
-            } else {
-              todoText.classList.remove('completed');
-            }
-          }
+  // 如果已经有待处理的更新，不要重复执行
+  if (pendingUpdates) return;
+  pendingUpdates = true;
+  
+  // 使用 requestAnimationFrame 确保在下一帧渲染时更新 DOM
+  if (updateTimeout) clearTimeout(updateTimeout);
+  updateTimeout = setTimeout(() => {
+    requestAnimationFrame(() => {
+      chrome.storage.local.get(['todos'], (result) => {
+        const todos = result.todos || [];
+        
+        // 使用简单的哈希比较，如果数据没变则不更新
+        const currentHash = JSON.stringify(todos);
+        if (currentHash === lastTodosHash) {
+          pendingUpdates = false;
+          return; // 数据没变，无需更新
+        }
+        lastTodosHash = currentHash;
+        
+        const todoList = document.getElementById('todoList');
+        if (!todoList) {
+          pendingUpdates = false;
+          return;
         }
         
-        // 重新排序，确保顺序正确
-        if (index !== Array.from(todoList.children).indexOf(existingItem)) {
-          todoList.appendChild(existingItem);
+        // 最小化 DOM 操作：找出哪些需要添加、哪些需要移除
+        const existingItems = Array.from(todoList.querySelectorAll('li'));
+        const existingIds = existingItems.map(li => li.dataset.id);
+        
+        // 找出需要添加的新项目
+        const todoIds = todos.map(todo => String(todo.id));
+        
+        // 创建文档片段，减少重排和重绘
+        const fragment = document.createDocumentFragment();
+        let needsReflow = false;
+        
+        // 移除不再存在的项目
+        existingItems.forEach(item => {
+          if (!todoIds.includes(item.dataset.id)) {
+            // 添加动画然后移除
+            item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            item.style.transform = 'translateX(-100%)';
+            item.style.opacity = '0';
+            needsReflow = true;
+            setTimeout(() => {
+              if (item.parentNode === todoList) {
+                todoList.removeChild(item);
+              }
+            }, 300);
+          }
+        });
+        
+        // 如果需要重排，强制浏览器立即处理
+        if (needsReflow) {
+          // 触发重排
+          void todoList.offsetHeight;
         }
-      }
+        
+        // 添加新项目或更新现有项目
+        let newItemsAdded = false;
+        todos.forEach((todo, index) => {
+          const id = String(todo.id);
+          const existingItem = todoList.querySelector(`li[data-id="${id}"]`);
+          
+          if (!existingItem) {
+            // 新项目，添加到文档片段
+            const newItem = createTodoElement(todo);
+            fragment.appendChild(newItem);
+            newItemsAdded = true;
+          } else {
+            // 更新现有项目状态
+            const checkbox = existingItem.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked !== todo.completed) {
+              checkbox.checked = todo.completed;
+              const todoText = existingItem.querySelector('.todo-text');
+              if (todoText) {
+                if (todo.completed) {
+                  todoText.classList.add('completed');
+                  existingItem.classList.add('completed-task');
+                } else {
+                  todoText.classList.remove('completed');
+                  existingItem.classList.remove('completed-task');
+                }
+              }
+            }
+            
+            // 重新排序，确保顺序正确
+            if (index !== Array.from(todoList.children).indexOf(existingItem)) {
+              todoList.appendChild(existingItem);
+            }
+          }
+        });
+        
+        // 一次性添加所有新项目
+        if (newItemsAdded) {
+          todoList.appendChild(fragment);
+        }
+        
+        pendingUpdates = false;
+      });
     });
-  });
+  }, 50); // 短暂延迟，合并多个快速更新
 }
 
-// 渲染待办事项
-function renderTodo(todo) {
-  const todoList = document.getElementById('todoList');
-  if (!todoList) return;
-  
+// 创建待办事项元素，但不添加到DOM
+function createTodoElement(todo) {
   const li = document.createElement('li');
-  li.dataset.id = todo.id; // 存储ID以便于删除
+  li.dataset.id = todo.id;
   if (todo.completed) {
     li.classList.add('completed-task');
   }
@@ -137,7 +177,6 @@ function renderTodo(todo) {
     <span class="todo-text ${todo.completed ? 'completed' : ''}">${todo.text}</span>
     <div class="swipe-hint"><span class="swipe-arrow">↔</span> 左右滑动删除</div>
   `;
-  todoList.appendChild(li);
 
   const checkbox = li.querySelector('input[type="checkbox"]');
   checkbox.addEventListener('change', () => {
@@ -157,6 +196,18 @@ function renderTodo(todo) {
   
   // 添加右滑删除功能
   makeSwipeable(li, todo.id);
+  return li;
+}
+
+// 渲染待办事项
+function renderTodo(todo) {
+  // 使用新的创建元素函数
+  const todoElement = createTodoElement(todo);
+  
+  const todoList = document.getElementById('todoList');
+  if (!todoList) return;
+  
+  todoList.appendChild(todoElement);
 }
 
 // 切换完成状态

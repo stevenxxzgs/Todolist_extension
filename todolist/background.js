@@ -1,3 +1,7 @@
+// 背景脚本 - To-Do Events
+// 作者: github:stevenxxzgs
+// 版本: 2.0
+
 // 监听扩展图标点击
 chrome.action.onClicked.addListener(async (tab) => {
   // 检查是否是受限制的页面
@@ -62,45 +66,73 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
             return;
           }
           
-          tabs.forEach(tab => {
-            // 不发送到内部页面
-            if (!tab.url.startsWith('chrome://') && 
-                !tab.url.startsWith('edge://') && 
-                !tab.url.startsWith('brave://')) {
-              // 只注入一次，使用标记防止重复注入
-              if (!tab.todoScriptInjected) {
-                chrome.scripting.executeScript({
-                  target: { tabId: tab.id },
-                  files: ["content.js"]
-                }).then(() => {
-                  tab.todoScriptInjected = true;
-                  chrome.scripting.insertCSS({
+          // 限制同时处理的标签页数量
+          const MAX_CONCURRENT_TABS = 5;
+          const tabsToProcess = tabs.filter(tab => 
+            !tab.url.startsWith('chrome://') && 
+            !tab.url.startsWith('edge://') && 
+            !tab.url.startsWith('brave://'))
+          ;
+          
+          // 分批处理标签页
+          function processBatch(startIndex) {
+            const batch = tabsToProcess.slice(startIndex, startIndex + MAX_CONCURRENT_TABS);
+            if (batch.length === 0) return;
+            
+            // 处理当前批次
+            Promise.all(batch.map(tab => {
+              return new Promise((resolve) => {
+                // 只注入一次，使用标记防止重复注入
+                if (!tab.todoScriptInjected) {
+                  chrome.scripting.executeScript({
                     target: { tabId: tab.id },
-                    files: ["content.css"]
+                    files: ["content.js"]
+                  }).then(() => {
+                    tab.todoScriptInjected = true;
+                    return chrome.scripting.insertCSS({
+                      target: { tabId: tab.id },
+                      files: ["content.css"]
+                    });
+                  }).then(() => {
+                    resolve();
+                  }).catch(e => {
+                    console.log("注入脚本失败或已存在:", e);
+                    resolve();
                   });
-                }).catch(e => console.log("注入脚本失败或已存在:", e));
-              } else {
-                // 短暂延迟后尝试更新
+                } else {
+                  // 短暂延迟后尝试更新
+                  setTimeout(() => {
+                    // 使用回调捕获错误，而不是try-catch（不适用于异步操作）
+                    chrome.tabs.sendMessage(tab.id, { 
+                      action: changes.darkTheme ? "updateTheme" : "updateTodos",
+                      // 添加增量更新标志
+                      incrementalUpdate: changes.todos && changes.todos.newValue && 
+                                       changes.todos.oldValue && 
+                                       changes.todos.newValue.length > changes.todos.oldValue.length,
+                      latestTodo: changes.todos && changes.todos.newValue && 
+                                 changes.todos.newValue[changes.todos.newValue.length-1]
+                    }, () => {
+                      if (chrome.runtime.lastError) {
+                        // 忽略错误，这是预期的如果内容脚本尚未准备好
+                        console.log(`发送到标签页 ${tab.id} 的消息被忽略:`, chrome.runtime.lastError.message);
+                      }
+                      resolve();
+                    });
+                  }, 100);
+                }
+              });
+            })).then(() => {
+              // 处理下一批
+              if (startIndex + MAX_CONCURRENT_TABS < tabsToProcess.length) {
                 setTimeout(() => {
-                  // 使用回调捕获错误，而不是try-catch（不适用于异步操作）
-                  chrome.tabs.sendMessage(tab.id, { 
-                    action: changes.darkTheme ? "updateTheme" : "updateTodos",
-                    // 添加增量更新标志
-                    incrementalUpdate: changes.todos && changes.todos.newValue && 
-                                     changes.todos.oldValue && 
-                                     changes.todos.newValue.length > changes.todos.oldValue.length,
-                    latestTodo: changes.todos && changes.todos.newValue && 
-                               changes.todos.newValue[changes.todos.newValue.length-1]
-                  }, () => {
-                    if (chrome.runtime.lastError) {
-                      // 忽略错误，这是预期的如果内容脚本尚未准备好
-                      console.log(`发送到标签页 ${tab.id} 的消息被忽略:`, chrome.runtime.lastError.message);
-                    }
-                  });
-                }, 100);
+                  processBatch(startIndex + MAX_CONCURRENT_TABS);
+                }, 200);
               }
-            }
-          });
+            });
+          }
+          
+          // 开始处理第一批
+          processBatch(0);
         });
       });
     }, 200); // 200ms 防抖延迟

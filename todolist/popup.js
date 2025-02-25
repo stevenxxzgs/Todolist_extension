@@ -1,3 +1,7 @@
+// 弹出窗口脚本 - To-Do Events
+// 作者: github:stevenxxzgs
+// 版本: 2.0
+
 document.addEventListener('DOMContentLoaded', () => {
   const todoInput = document.getElementById('todoInput');
   const addButton = document.getElementById('addButton');

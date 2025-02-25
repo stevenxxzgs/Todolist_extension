@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "To-Do Events",
-  "version": "1.0",
-  "description": "A Material Design to-do list for Chrome",
+  "version": "2.0",
+  "description": "A to-do list for Chrome",
+  "author": "github:stevenxxzgs",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
