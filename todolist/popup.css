@@ -1,0 +1,642 @@
+body {
+  width: 300px;
+  min-height: 350px;
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans SC', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+body.dark-theme {
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+body.dark-theme #container {
+  background: #1f1f1f;
+}
+
+.header {
+  background: #66aee0;
+  color: white;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.header-content::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+}
+
+.header-icon {
+  margin-right: 6px;
+  font-size: 20px;
+}
+
+.theme-toggle {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: rotate(30deg);
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.input-container {
+  padding: 12px 12px 8px 12px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+body.dark-theme .input-row {
+  background: #2d2d2d;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.input-field {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  outline: none;
+  background: transparent;
+  font-family: 'Noto Sans SC', sans-serif;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+body.dark-theme .input-field {
+  color: #f0f0f0;
+}
+
+body.dark-theme .input-field::placeholder {
+  color: #aaa;
+}
+
+.add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #66aee0;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple {
+  position: absolute;
+  background: rgba(102, 174, 224, 0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  animation: none;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.add-btn:hover {
+  background-color: #529dcd;
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+.add-btn .material-icons {
+  font-size: 18px;
+}
+
+.separator {
+  padding: 0 12px;
+  margin: 4px 0;
+  position: relative;
+  text-align: center;
+}
+
+.separator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background-color: #e0e0e0;
+  z-index: 1;
+}
+
+body.dark-theme .separator::before {
+  background-color: #3a3a3a;
+}
+
+/* 分隔符文本样式 - 白天模式 */
+.separator-text {
+  display: inline-block;
+  padding: 0 10px;
+  background-color: #f5f5f5;
+  position: relative;
+  z-index: 2;
+  font-size: 12px;
+  color: #757575;
+  transition: all 0.3s ease;
+}
+
+/* 黑夜模式的分隔符保持不变 */
+body.dark-theme .separator-text {
+  background-color: #252525;
+  color: #66aee0;
+  font-weight: 300;
+  padding: 0 10px;
+}
+
+.todos-container {
+  padding: 0 12px 10px 12px;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 0 12px;
+  padding-top: 8px;
+}
+
+body.dark-theme .todos-container {
+  background-color: #252525;
+  border-radius: 8px;
+  margin: 0 12px;
+  padding-top: 8px;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 250px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.todo-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+body.dark-theme .todo-list::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+  background: #bdc3c7;
+  border-radius: 4px;
+}
+
+body.dark-theme .todo-list::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+/* 任务项目样式 - 仅白天模式 */
+.todo-list li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(210, 210, 210, 0.9);
+}
+
+/* 黑夜模式的任务项目单独设置 */
+body.dark-theme .todo-list li {
+  background-color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #444;
+}
+
+/* 悬停效果 - 白天模式 */
+.todo-list li:hover {
+  background: rgba(250, 250, 250, 0.9);
+  border-left: 3px solid #66aee0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+}
+
+/* 黑夜模式的悬停效果 */
+body.dark-theme .todo-list li:hover {
+  background-color: #3a3a3a;
+  border-left: 3px solid #66aee0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* 任务文本 - 白天模式 */
+.todo-text {
+  flex: 1;
+  font-size: 13px;
+  margin-left: 8px;
+  color: #333;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* 黑夜模式的任务文本 */
+body.dark-theme .todo-text {
+  color: #e6e6e6;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* 优化已完成任务的视觉效果 - 白天模式 */
+.todo-text.completed {
+  text-decoration: line-through;
+  color: #66aee0;
+  text-decoration-color: #66aee0;
+  text-decoration-thickness: 2px;
+  font-weight: 400;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+/* 添加已完成任务的背景标记 */
+.todo-list li .checkbox-container input:checked ~ .todo-text::before {
+  content: "✓";
+  position: absolute;
+  right: 10px;
+  color: #66aee0;
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0.5;
+}
+
+/* 增强已完成任务的视觉区分 */
+.todo-list li.completed-task {
+  background-color: rgba(240, 248, 255, 0.8) !important;
+  border-left: 3px solid #66aee0 !important;
+}
+
+.todo-list li.completed-task:hover {
+  background-color: rgba(235, 245, 255, 0.9) !important;
+  border-left: 3px solid #529dcd !important;
+}
+
+/* 黑夜模式的已完成任务 */
+body.dark-theme .todo-text.completed {
+  color: #78c2f5;
+  opacity: 0.75;
+  text-decoration-thickness: 2px;
+}
+
+body.dark-theme .todo-list li.completed-task {
+  background-color: rgba(40, 57, 71, 0.8) !important;
+}
+
+body.dark-theme .todo-list li .checkbox-container input:checked ~ .todo-text::before {
+  color: #78c2f5;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 3px;
+  margin-left: 4px;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+.delete-btn .material-icons {
+  font-size: 16px;
+}
+
+/* 自定义复选框样式 */
+.checkbox-container {
+  display: inline-block;
+  position: relative;
+  padding-left: 20px;
+  cursor: pointer;
+  user-select: none;
+  height: 16px;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* 复选框 - 白天模式 */
+.checkbox-container .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* 黑夜模式的复选框 */
+body.dark-theme .checkbox-container .checkmark {
+  background-color: #444;
+  border: 1px solid #555;
+}
+
+/* 复选框选中样式 - 白天模式 */
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #66aee0;
+  box-shadow: 0 1px 3px rgba(102, 174, 224, 0.4);
+  border-color: #66aee0;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* 复选框悬停效果 */
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #e6f3fa;
+  border-color: #66aee0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container:hover input:checked ~ .checkmark {
+  background-color: #78b8e6;
+  box-shadow: 0 1px 4px rgba(102, 174, 224, 0.5);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+  transition: all 0.2s ease;
+  animation: checkmark 0.2s ease forwards;
+}
+
+@keyframes checkmark {
+  0% { transform: rotate(45deg) scale(0.8); opacity: 0.5; }
+  100% { transform: rotate(45deg) scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(5px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.settings {
+  padding: 10px 12px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+body.dark-theme .settings {
+  border-top: 1px solid #333;
+  background-color: #252525;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.setting-row:last-child {
+  margin-bottom: 0;
+}
+
+/* 开关样式 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #66aee0;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #66aee0;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: #95a5a6;
+  text-align: center;
+}
+
+.empty-icon-container {
+  background-color: rgba(189, 195, 199, 0.1);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+body.dark-theme .empty-icon-container {
+  background-color: rgba(189, 195, 199, 0.05);
+}
+
+.empty-state .material-icons {
+  font-size: 28px;
+  margin-bottom: 4px;
+  color: #bdc3c7;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.empty-subtext {
+  font-size: 12px !important;
+  color: #aaa;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.settings-icon {
+  font-size: 18px;
+  margin-right: 6px;
+  color: #757575;
+}
+
+body.dark-theme .settings-icon {
+  color: #aaa;
+}
+
+.footer {
+  padding: 6px;
+  text-align: center;
+  font-size: 10px;
+  color: #95a5a6;
+  border-top: 1px solid #e0e0e0;
+}
+
+body.dark-theme .footer {
+  color: #666;
+  border-top: 1px solid #333;
+}
+
+body.dark-theme .input-field:focus {
+  background-color: rgba(102, 174, 224, 0.05);
+}
+
+.input-field:focus + .add-btn {
+  background-color: #78b8e6;
+  transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+
+.setting-row:hover {
+  background-color: rgba(102, 174, 224, 0.05);
+  border-radius: 4px;
+}
+
+body.dark-theme .separator-text {
+  background-color: #252525;
+  color: #66aee0;
+  font-weight: 500;
+  padding: 0 10px;
+}
+
+body.dark-theme .checkbox-container .checkmark {
+  background-color: #444;
+  border: 1px solid #555;
+}

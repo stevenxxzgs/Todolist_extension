@@ -1,0 +1,330 @@
+#todo-widget-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  z-index: 9999;
+  background-color: transparent;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: #333;
+  border-radius: 8px;
+  padding: 10px;
+  overflow: visible;
+}
+
+.input-container {
+  padding: 16px 16px 12px 16px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.input-field {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  outline: none;
+  background: transparent;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+.add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-btn:hover {
+  background-color: #3367d6;
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+.add-btn .material-icons {
+  font-size: 18px;
+}
+
+.todos-container {
+  padding: 0 16px 16px 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.todo-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+  background: #bdc3c7;
+  border-radius: 4px;
+}
+
+.todo-list li {
+  position: relative;
+  overflow: visible !important;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(220, 220, 220, 0.8);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.todo-list li:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-left: 3px solid #66aee0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+}
+
+.todo-text {
+  flex: 1;
+  margin-left: 8px;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: #333;
+}
+
+.todo-text.completed {
+  text-decoration: line-through !important;
+  color: #66aee0 !important;
+  text-decoration-color: #66aee0 !important;
+  text-decoration-thickness: 2px !important;
+  opacity: 0.8 !important;
+  padding-right: 30px !important;
+  transition: all 0s !important;
+}
+
+/* 改进已完成任务的视觉标记 */
+.checkbox-container input:checked ~ .todo-text::before {
+  content: "✓";
+  position: fixed;
+  right: 30px;
+  color: #66aee0;
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0.5;
+  z-index: 10000;
+}
+
+/* 增强已完成任务的视觉区分 */
+.todo-list li.completed-task {
+  background-color: rgba(240, 248, 255, 0.8) !important;
+  border-left: 3px solid #66aee0 !important;
+}
+
+/* 黑夜模式下的已完成任务 */
+#todo-widget-container.dark-theme .todo-text.completed {
+  color: #78c2f5;
+  opacity: 0.75;
+  text-decoration-thickness: 2px;
+  padding-right: 20px;
+}
+
+#todo-widget-container.dark-theme .todo-list li.completed-task {
+  background-color: rgba(40, 57, 71, 0.8) !important;
+}
+
+#todo-widget-container.dark-theme .checkbox-container input:checked ~ .todo-text::before {
+  color: #78c2f5;
+  z-index: 10000;
+  opacity: 0.8;
+}
+
+/* 其余的CSS样式（复选框、删除按钮等）保持不变... */
+
+/* 添加滑动删除的样式 */
+.swipe-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  color: #e74c3c;
+  opacity: 0;
+  font-size: 12px;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+/* 修改滑动特效动画 */
+@keyframes slideRight {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(7px); }
+  30% { transform: translateX(0); }
+  45% { transform: translateX(-7px); }
+  60% { transform: translateX(0); }
+  75% { transform: translateX(5px); }
+  90% { transform: translateX(-5px); }
+}
+
+.todo-list li:hover .swipe-arrow {
+  animation: slideRight 1.5s infinite;
+  display: inline-block;
+}
+
+/* 添加边缘提示效果 */
+.todo-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: #66aee0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.todo-list li::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: #66aee0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* 防止已完成任务的右边竖线与勾选标记重叠 */
+.todo-list li.completed-task::after {
+  display: none;
+}
+
+/* 修复黑夜模式下勾选标记右侧的竖线问题 */
+#todo-widget-container.dark-theme .todo-list li.completed-task::after {
+  display: none;
+}
+
+/* 添加黑暗模式支持 */
+#todo-widget-container.dark-theme {
+  color: #f0f0f0;
+}
+
+#todo-widget-container.dark-theme .todo-list li {
+  background: rgba(40, 40, 40, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(60, 60, 60, 0.8);
+}
+
+#todo-widget-container.dark-theme .todo-list li:hover {
+  background: rgba(50, 50, 50, 0.9);
+  border-left: 3px solid #66aee0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+#todo-widget-container.dark-theme .checkbox-container .checkmark {
+  background-color: #333;
+  border: 1px solid #555;
+}
+
+#todo-widget-container.dark-theme .todo-text {
+  color: #ffffff;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#todo-widget-container.dark-theme .todo-text.completed {
+  color: #78c2f5;
+  opacity: 0.75;
+  text-decoration-thickness: 2px;
+}
+
+#todo-widget-container.dark-theme .checkbox-container input:checked ~ .checkmark {
+  background-color: #66aee0;
+}
+
+#todo-widget-container.dark-theme .checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+#todo-widget-container.dark-theme .todo-list li.completed-task {
+  background-color: rgba(40, 57, 71, 0.8) !important;
+}
+
+#todo-widget-container.dark-theme .checkbox-container input:checked ~ .todo-text::before {
+  color: #78c2f5;
+}
+
+/* 调整透明背景下的容器样式 */
+#todo-widget-container[style*="transparent"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 确保透明背景下不留下多余的边框 */
+#todo-widget-container.dark-theme[style*="transparent"] {
+  box-shadow: none !important; 
+  border: none !important;
+}
+
+/* 增强透明背景下任务项的可读性 */
+#todo-widget-container.dark-theme[style*="transparent"] .todo-list li {
+  background: rgba(30, 30, 30, 0.5);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(80, 80, 80, 0.2);
+}
+
+/* 设置复选框选中状态样式 */
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #66aee0;
+  box-shadow: 0 1px 3px rgba(102, 174, 224, 0.4);
+  border-color: #66aee0;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* 复选框悬停效果 */
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #e6f3fa;
+  border-color: #66aee0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container:hover input:checked ~ .checkmark {
+  background-color: #78b8e6;
+  box-shadow: 0 1px 4px rgba(102, 174, 224, 0.5);
+}
+
